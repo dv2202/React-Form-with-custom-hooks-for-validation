@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 
 const useForm = (initialValues, validate) => {
@@ -6,23 +6,25 @@ const useForm = (initialValues, validate) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const resetForm = useCallback(() => {
+    setValues(initialValues);
+    setErrors({});
+  }, [initialValues]);
+
   useEffect(() => {
     if (isSubmitting) {
       const noErrors = Object.keys(errors).length === 0;
       if (noErrors) {
-        toast.success('Registration Successfull !');
+        toast.success('Registration Successful!');
         console.log('Form data:', values);
-        setValues('');
-        setIsSubmitting(false);
         resetForm();
+        setIsSubmitting(false);
       } else {
         toast.error('There is something wrong with the form');
         setIsSubmitting(false);
       }
     }
-  }, [errors]);
-
-  console.log('values:', values);
+  }, [errors, isSubmitting, values, resetForm]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -37,12 +39,6 @@ const useForm = (initialValues, validate) => {
     setErrors(validate(values));
     setIsSubmitting(true);
   };
-
-  const resetForm = () => {
-    setValues(initialValues);
-    setErrors({});
-  };
-
 
   return {
     values,
